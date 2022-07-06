@@ -133,28 +133,29 @@ class VDNet(nn.Module):
         self.outconv = nn.Conv2d(64, 1, kernel_size=1)
 
     def forward(self, x):
+        
         xfc = self.fc(x)
         xfc = xfc.view(-1, 1, 64, 64)  # reshape to  1 x 64 x 64
-        xc1,xc2=self.L_64(xfc)
-        xd1=self.maxpool1(xc2)
+        xc1, xc2 = self.L_64(xfc)
+        xd1 = self.maxpool1(xc2)
 
-        xc3,xc4=self.L_32(xd1)
+        xc3, xc4 = self.L_32(xd1)
 
-        xd2=self.maxpool2(xc4)
+        xd2 = self.maxpool2(xc4)
 
-        xc5,xc6=self.L_16(xd2)
+        xc5, xc6 = self.L_16(xd2)
 
-        xd3=self.maxpool3(xc6)
+        xd3 = self.maxpool3(xc6)
 
-        xc7,xc8=self.L_8(xd3)
+        xc7, xc8 = self.L_8(xd3)
 
-        xd4=self.maxpool4(xc8)
+        xd4 = self.maxpool4(xc8)
 
-        xc9,xc10=self.B_4(xd4)
+        xc9, xc10 = self.B_4(xd4)
 
-        xu1=self.tconv1(xc10)
+        xu1 = self.tconv1(xc10)
 
-        xc12=self.R_8(xu1,xc7,xc8,xd3)
+        xc12 = self.R_8(xu1,xc7,xc8,xd3)
 
         xu2 = self.tconv2(xc12)
 
@@ -174,11 +175,14 @@ class VDNet(nn.Module):
 
 
 if __name__ == '__main__':
-
+    
+    # data
     x = torch.empty(2, 104)
-
+    
+    # model
     model = VDNet()
-
+    
+    # forward
     y = model(x)
 
     # results
@@ -186,3 +190,6 @@ if __name__ == '__main__':
     print(x.shape)
     print(y.shape)
     print('----------------------------')
+    
+    
+    
