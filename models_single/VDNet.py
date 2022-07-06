@@ -3,9 +3,8 @@ import torch.nn as nn
 import math
 
 
-# ######################################################################################################################
-#                                             Components of Model
-# ######################################################################################################################
+# -------------------  Basic Model Components  -----------------------  
+
 class FCReLU(nn.Module):
     def __init__(self, in_features, out_features):
         super().__init__()
@@ -23,9 +22,9 @@ class FcBlock(nn.Module):
         self.fc2 = nn.Linear(math.ceil(out_features/4), math.ceil(out_features/2))
         self.fc3 = nn.Linear(math.ceil(out_features/2),math.ceil(out_features / 4))
         self.fc4 = nn.Linear(math.ceil(out_features / 4), math.ceil(out_features / 2))
-        self.fc5 = nn.Linear(math.ceil(out_features / 2), out_features)
+        self.fc5 = nn.Linear(math.ceil(out_features / 2), out_features)   
+        
     def forward(self,x):
-        #return self.fc3(self.fc2(self.fc1(x)))
         return self.fc5(self.fc4(self.fc3(self.fc2(self.fc1(x)))))
 
 
@@ -51,13 +50,11 @@ class TwoConvReLU(nn.Module):
     def forward(self, x):
         x1=self.conv1(x)
         x2=self.conv2(x1)
-        return x1,x2
-
-#
+        return x1, x2
 
 
-# Tconv for upsampling
 class TconvReLU(nn.Module):
+    ''' For upsampling '''
     def __init__(self, in_channels, out_channels, kernel_size, stride=1, padding=0, output_padding=0,
                 groups=1, bias=True, dilation=1, padding_mode='zeros'):
         super().__init__()
@@ -69,7 +66,9 @@ class TconvReLU(nn.Module):
     def forward(self, x):
         return self.relu(self.tconv(x))
 
-#Dense Block1
+    
+# -----------------------  Dense Blocks  -----------------------
+
 class TwoConvReLU_Dense1(nn.Module):
     def __init__(self, in_channels1, in_channels2,out_channels):
         super().__init__()
@@ -77,11 +76,11 @@ class TwoConvReLU_Dense1(nn.Module):
         self.conv2 = ConvReLU(in_channels2, out_channels, kernel_size=3, padding=1)
 
     def forward(self, x, c1,c2):
-        x1=self.conv1(torch.cat((c1,c2,x),dim=1))
-        x2=self.conv2(torch.cat((c1,c2,x1,x),dim=1))
+        x1 = self.conv1(torch.cat((c1,c2,x),dim=1))
+        x2 = self.conv2(torch.cat((c1,c2,x1,x),dim=1))
         return x2
-
-#Dense Block2-4
+    
+    
 class TwoConvReLU_Dense2(nn.Module):
     def __init__(self, in_channels1,in_channels2, out_channels):
         super().__init__()
@@ -89,18 +88,17 @@ class TwoConvReLU_Dense2(nn.Module):
         self.conv2 = ConvReLU(in_channels2, out_channels, kernel_size=3, padding=1)
 
     def forward(self, x,c1,c2,d1):
-        x1=self.conv1(torch.cat((d1,c1,c2,x),dim=1))
-        x2=self.conv2(torch.cat((d1,c1,c2,x,x1),dim=1))
+        x1 = self.conv1(torch.cat((d1,c1,c2,x),dim=1))
+        x2 = self.conv2(torch.cat((d1,c1,c2,x,x1),dim=1))
         return x2
 
 
-# ######################################################################################################################
-#                                                The Model
-# ######################################################################################################################
+# -----------------------  Complete Model  -------------------------
+
 class VDNet(nn.Module):
     def __init__(self):
         super().__init__()
-        self.fc = FcBlock(104,64*64)
+        self.fc = FcBlock(104, 64*64)
 
         # Left
         self.L_64 = TwoConvReLU(1, 64)
@@ -114,6 +112,7 @@ class VDNet(nn.Module):
 
         self.L_8 = TwoConvReLU(256, 512)
         self.maxpool4 = nn.MaxPool2d(kernel_size=2, stride=2)
+        
         # Bottom
         self.B_4 = TwoConvReLU(512,1024)
 
