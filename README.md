@@ -3,4 +3,4 @@
 Architecture of En-MSFCF-Net
 -----------------------------------------------------------------
 
-<img src="./architecture.PNG" width="800px"/>
+<img src="./architecture.PNG" width="1000px"/>
